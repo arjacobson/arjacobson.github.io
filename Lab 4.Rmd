@@ -1,0 +1,168 @@
+---
+title: "Lab 4"
+author: "Amber Jacobson"
+date: "October 10, 2017"
+output: html_document
+---
+
+## Question 1
+
+The number of points scored by each team in a tournament is normally distributed, with mean μ = 32 and standard deviation σ = 7. What is the probability of:
+
+### Part A 
+
+ A team scoring 20 points or fewer? Plot the density function and shade the area. (5 pt.)
+ 
+ 
+```{r}
+pnorm(20, mean = 32, sd = 7)
+
+cord.x <-  c(20, seq(0, 20, 0.01), 20)
+cord.y <- c(0, dnorm(seq(0, 20, 0.01), mean = 32, sd = 7), 0)
+curve(dnorm(x, 32, 7), xlim=c(11,53), main = "Normal Density")
+polygon(cord.x,cord.y, density=10, col="blue")
+
+# Why is the equation used with pnorm then plotted with the dnorm function?
+```
+
+### Part B 
+
+ A team scoring more than 35 points? Plot the density function and shade the area. (5 pt.)
+ 
+```{r}
+pnorm(35, mean =32, sd = 7, lower.tail = FALSE)
+
+curve(dnorm(x, 32, 7), xlim=c(14, 59))
+cord.x <- c(35, seq(35, 59, .01), 35)
+cord.y <- c(0, dnorm(seq(35, 59, 0.01), mean = 32, sd = 7), 0)
+polygon(cord.x, cord.y, density=10, col="blue")
+```
+
+### Part C
+
+A team scoring between 20 and 40 points? Plot the density function and shade the area. 
+
+```{r}
+pnorm(40, mean = 32, sd = 7) - pnorm(20, mean = 32, sd = 7, lower.tail=FALSE)
+
+curve(dnorm(x,32,7), from= 11, to= 53)
+a <- c(20, seq(20,40,0.01), 40)
+b <- c(0, dnorm(seq(20,40,0.01), mean=32, sd=7), 0)
+polygon(a, b, col = "blue")
+
+```
+
+
+## Question 2 
+
+The number of comments per post on a social media site is exponentially distributed, with the
+average post receiving ten comments. What percentage of posts get:
+
+### Part A
+
+Fewer than three comments? Plot the density function and shade the area. (5 pt.)
+
+```{r}
+pexp(3, rate = 1/10 , lower.tail=TRUE)
+
+
+
+curve(dexp(x,1/10), from =0, to=3)
+c <- c(0, seq(0, .95, 0.001), 0)
+d <- c(.1, pexp(seq(0, .95, 0.001), rate = 1/10), .1)
+polygon(c,d,col="red")
+
+
+
+```
+
+### Part B 
+
+More than 20 comments? Plot the density function and shade the area. (5 pt.)
+
+```{r}
+pexp(20, rate = 1/10, lower.tail=FALSE)
+
+curve(dexp(x,1/10), from =20, to=50)
+e <- c(0, seq(0, .014, .01), 0)
+f <- c(20, pexp(seq(0,.014,.01), rate = 1/10),20)
+polygon(e,f,col="red")
+
+```
+
+### Part C
+
+Between five and ten comments? Plot the density function and shade the area. (5 pt.)
+
+```{r}
+pexp(10, rate =1/10) - pexp(5, rate = 1/10)
+
+curve(dexp(x,1/10), from =5, to=10)
+e <- c(5, seq(0, .06, 0.01), .5)
+f <- c(10, dexp(seq(0, .06, 0.01), rate = 1/10), 10)
+polygon(e,f,col="red")
+
+```
+
+
+## Question 3 
+
+### Part A 
+
+Create a first raster (30 rows ×30 columns) and assign values to the raster based on random values from a uniform distribution. Plot the raster and the histogram. (5 pt.)
+
+```{r}
+library(raster)
+ras1 <- raster(nrows=30, ncols=30, xmn=0, xmx=30, ymn=0, ymx=30)
+ras1[] <- runif(ncell(ras1))
+plot(ras1)
+hist(ras1, main = "Uniform Distribution")
+```
+
+
+### Part B 
+
+Create a second raster (30 rows ×30 columns) and assign values to the raster based on random values from a normal distribution. Plot the raster and the histogram. (5 pt.)
+
+```{r}
+library(raster)
+ras2 <- raster(nrows=30, ncols=30, xmn=0, xmx=30, ymn=0, ymx=30)
+ras2[] <- rnorm(ncell(ras2))
+plot(ras2)
+hist(ras2, main="Normal Distribution")
+```
+
+
+### Part C 
+
+Create a third raster (30 rows ×30 columns) and assign values to the raster based on cell-by-cell addition of the first raster and the second raster. Plot the raster and the histogram. (5 pt.)
+
+
+```{r}
+library(raster)
+ras1 <- raster(nrows=30, ncols=30, xmn=0, xmx=30, ymn=0, ymx=30)
+ras1[] <- runif(ncell(ras1))
+ras2 <- raster(nrows=30, ncols=30, xmn=0, xmx=30, ymn=0, ymx=30)
+ras2[] <- rnorm(ncell(ras2))
+ras3 <- ras1 + ras2 
+plot(ras3)
+hist(ras3, main="Cell-by-Cell Addition")
+
+```
+
+
+
+### Part D 
+
+Calculate the mean value of the third raster. Reclassify the third raster into a binary image: 1 (cell value > mean value) and 0 (cell value <= mean value). Save the reclassified image to your working directory as a TIFF image. (5 pt.)
+
+```{r}
+library(raster)
+cellStats(ras3, "mean")
+
+ras3[ras3 > 1/10] <- 1
+ras3[ras3 <= 1/10] <- 0
+rastif <- ras3 + ras3 * 10
+writeRaster(rastif, filename="mean.tif", overwrite=TRUE)
+```
+
